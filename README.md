@@ -67,4 +67,3 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ---
 
-This README template captures the essential details for your Pomodoro app. You can adjust it to fit any additional features you implement!
