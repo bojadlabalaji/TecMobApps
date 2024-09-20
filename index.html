@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pomodoro Timer</title>
+    <style>
+        :root {
+            --primary-color: #c8e9fc;   /* 70% - Light teal */
+            --secondary-color: #79afff; /* 20% - Medium teal */
+            --accent-color: #004278;    /* 10% - Dark teal */
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: var(--primary-color);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .container {
+            width: 430px;
+            height: 932px;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(127, 165, 230, 0.502);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 40px 20px;
+            box-sizing: border-box;
+        }
+
+        .title {
+            font-size: 36px;
+            color: var(--accent-color);
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .timer-block {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        #timer-display {
+            font-size: 72px;
+            font-weight: bold;
+            color: var(--accent-color);
+            margin-bottom: 20px;
+        }
+
+        #break-timer-display {
+            font-size: 48px;
+            font-weight: bold;
+            color: var(--secondary-color);
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .input-group {
+            position: relative;
+            margin: 20px;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 10px;
+            font-size: 16px;
+            border: 2px solid var(--secondary-color);
+            border-radius: 5px;
+            background-color: white;
+            color: var(--accent-color);
+            outline: none;
+            transition: border-color 0.3s;
+        }
+
+        .input-group input::placeholder {
+            color: var(--secondary-color);
+        }
+
+        .input-group input:focus {
+            border-color: var(--accent-color);
+        }
+
+        /* .input-group input:focus::placeholder {
+            color: transparent;
+        } */
+
+        .input-group label {
+            position: absolute;
+            top: -10px;
+            left: 10px;
+            font-size: 12px;
+            color: var(--accent-color);
+            background-color: white;
+            padding: 0 5px;
+            display: block;
+        }
+
+        /* .input-group input + label {
+            display: block;
+        } */
+
+        .timer-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        button {
+            flex: 1;
+            padding: 15px 0;
+            font-size: 18px;
+            border: none;
+            border-radius: 5px;
+            background-color: var(--accent-color);
+            color: white;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            max-width: 150px;
+        }
+
+        button:hover {
+            background-color: var(--secondary-color);
+        }
+
+        .repetition-indicator {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .repetition-dot {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            border: 2px solid var(--secondary-color);
+            transition: background-color 0.3s;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+        }
+
+        .repetition-dot.completed {
+            border-color: var(--accent-color);
+        }
+
+        .repetition-dot.completed img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .animation-block {
+            position: relative;
+            width: 300px;
+            height: 300px;
+            margin: 20px auto;
+        }
+
+        .progress-ring {
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+
+        .progress-ring__circle {
+            transition: 0.35s stroke-dashoffset;
+            transform: rotate(-90deg);
+            transform-origin: 50% 50%;
+            stroke: var(--accent-color);
+            stroke-width: 8;
+        }
+
+        #animation-gif {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 250px;
+            height: 250px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="title">Pomodoro Timer</h1>
+        
+        <div class="timer-block">
+            <div id="timer-display">25:00</div>
+            <div id="break-timer-display">Break: 05:00</div>
+            <div id="input-container">
+                <div class="input-group">
+                    <input type="number" id="work-duration"  required min="1" max="60" value="25">
+                    <label for="work-duration">Work Duration (minutes)</label>
+                </div>
+                <div class="input-group">
+                    <input type="number" id="break-duration"  required min="1" max="30" value="5">
+                    <label for="break-duration">Break Duration (minutes)</label>
+                </div>
+                <div class="input-group">
+                    <input type="number" id="repetitions"  required min="1" max="10" value="2">
+                    <label for="repetitions">Repetitions</label>
+                </div>
+            </div>
+            <div class="timer-buttons">
+                <button id="start-btn">Start</button>
+                <button id="pause-btn" style="display: none;">Pause</button>
+                <button id="reset-btn" style="display: none;">Reset</button>
+            </div>
+        </div>
+        
+        <div class="repetition-indicator" id="repetition-indicator"></div>
+        
+        <div class="animation-block">
+            <svg class="progress-ring" width="300" height="300">
+                <circle class="progress-ring__circle" stroke="white" stroke-width="8" fill="transparent" r="146" cx="150" cy="150"/>
+            </svg>
+            <img id="animation-gif" src="initi.gif" alt="Timer animation">
+        </div>
+    </div>
+
+    <script>
+        const timerDisplay = document.getElementById('timer-display');
+        const breakTimerDisplay = document.getElementById('break-timer-display');
+        const workDurationInput = document.getElementById('work-duration');
+        const breakDurationInput = document.getElementById('break-duration');
+        const repetitionsInput = document.getElementById('repetitions');
+        const startBtn = document.getElementById('start-btn');
+        const pauseBtn = document.getElementById('pause-btn');
+        const resetBtn = document.getElementById('reset-btn');
+        const repetitionIndicator = document.getElementById('repetition-indicator');
+        const animationGif = document.getElementById('animation-gif');
+        const progressRing = document.querySelector('.progress-ring__circle');
+        const inputContainer = document.getElementById('input-container');
+
+        let timer;
+        let isRunning = false;
+        let isBreak = false;
+        let currentRepetition = 1;
+        let timeLeft;
+        let totalTime;
+
+        const radius = progressRing.r.baseVal.value;
+        const circumference = radius * 2 * Math.PI;
+        progressRing.style.strokeDasharray = `${circumference} ${circumference}`;
+        progressRing.style.strokeDashoffset = circumference;
+
+        function setProgress(percent) {
+            const offset = circumference - (percent / 100) * circumference;
+            progressRing.style.strokeDashoffset = offset;
+        }
+
+        function updateRepetitionIndicator() {
+            repetitionIndicator.innerHTML = '';
+            const totalRepetitions = parseInt(repetitionsInput.value);
+            for (let i = 0; i < totalRepetitions; i++) {
+                const dot = document.createElement('div');
+                dot.classList.add('repetition-dot');
+                if (i < currentRepetition - 1 || (i === currentRepetition - 1 && isBreak)) {
+                    dot.classList.add('completed');
+                    const img = document.createElement('img');
+                    img.src = 'face.png';
+                    img.alt = 'Completed';
+                    dot.appendChild(img);
+                }
+                repetitionIndicator.appendChild(dot);
+            }
+        }
+
+        function updateTimerDisplay() {
+            const minutes = Math.floor(timeLeft / 60);
+            const seconds = timeLeft % 60;
+            const display = isBreak ? breakTimerDisplay : timerDisplay;
+            display.textContent = isBreak ? `Break: ${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}` : 
+                                            `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            const progress = ((totalTime - timeLeft) / totalTime) * 100;
+            setProgress(progress);
+        }
+
+        function startTimer() {
+            if (!isRunning) {
+                isRunning = true;
+                inputContainer.style.display = 'none';
+                startBtn.style.display = 'none';
+                pauseBtn.style.display = 'inline-block';
+                resetBtn.style.display = 'inline-block';
+                
+                if (!timeLeft) {
+                    totalTime = parseInt(workDurationInput.value) * 60;
+                    timeLeft = totalTime;
+                }
+                
+                timer = setInterval(() => {
+                    timeLeft--;
+                    updateTimerDisplay();
+                    
+                    if (timeLeft === 0) {
+                        clearInterval(timer);
+                        if (!isBreak) {
+                            isBreak = true;
+                            isRunning = false;
+                            totalTime = parseInt(breakDurationInput.value) * 60;
+                            timeLeft = totalTime;
+                            animationGif.src = 'playing1.gif';
+                            timerDisplay.style.display = 'none';
+                            breakTimerDisplay.style.display = 'block';
+                            startTimer();
+                        } else {
+                            isBreak = false;
+                            currentRepetition++;
+                            if (currentRepetition > parseInt(repetitionsInput.value)) {
+                                resetTimer();
+                                animationGif.src = 'celeb.gif';
+                            } else {
+                                totalTime = parseInt(workDurationInput.value) * 60;
+                                timeLeft = totalTime;
+                                animationGif.src = 'runninggif.gif';
+                                timerDisplay.style.display = 'block';
+                                breakTimerDisplay.style.display = 'none';
+                                isRunning = false;
+                                startTimer();
+                            }
+                        }
+                        updateRepetitionIndicator();
+                    }
+                }, 1000);
+                
+                animationGif.src = isBreak ? 'playing1.gif' : 'runninggif.gif';
+                
+
+            }
+            
+        }
+
+        function pauseTimer() {
+            if (isRunning) {
+                isRunning = false;
+                clearInterval(timer);
+                pauseBtn.textContent = 'Resume';
+                animationGif.src = 'crying.gif';
+            } else {
+                startTimer();
+                pauseBtn.textContent = 'Pause';
+            }
+        }
+
+        function resetTimer() {
+            isRunning = false;
+            isBreak = false;
+            currentRepetition = 1;
+            timeLeft = null;
+            clearInterval(timer);
+            inputContainer.style.display = 'block';
+            startBtn.style.display = 'inline-block';
+            pauseBtn.style.display = 'none';
+            resetBtn.style.display = 'none';
+            pauseBtn.textContent = 'Pause';
+            timerDisplay.textContent = `${workDurationInput.value.toString().padStart(2, '0')}:00`;
+            timerDisplay.style.display = 'block';
+            breakTimerDisplay.style.display = 'none';
+            animationGif.src = 'init.gif';
+            setProgress(0);
+            updateRepetitionIndicator();
+        }
+
+        startBtn.addEventListener('click', startTimer);
+        pauseBtn.addEventListener('click', pauseTimer);
+        resetBtn.addEventListener('click', resetTimer);
+        workDurationInput.addEventListener('change', resetTimer);
+        breakDurationInput.addEventListener('change', resetTimer);
+        repetitionsInput.addEventListener('change', () => {
+            resetTimer();
+            updateRepetitionIndicator();
+        });
+
+        updateRepetitionIndicator();
+        resetTimer();
+    </script>
+</body>
+</html>
