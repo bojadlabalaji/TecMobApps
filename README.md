@@ -25,7 +25,7 @@ _Add screenshots here showing key features of your app._
 ## How to Use
 1. Clone the repository:
    ```bash
-   git clone https://github.com/bojadlabalaji/TecMobApps.git
+   git clone https://github.com/YOUR-USERNAME/pomodoro-app.git
    ```
 2. Open the `index.html` file in your browser, or use a local development server.
 3. Adjust the work and break intervals using the input fields (defaults to 25 minutes for work and 4 minutes for short breaks).
