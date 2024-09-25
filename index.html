@@ -3,8 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pomodoro Timer</title>
+    <title>iPhone 14 Pro Max - Pomodoro</title>
     <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
         :root {
             --primary-color: #c8e9fc;   /* 70% - Light teal */
             --secondary-color: #79afff; /* 20% - Medium teal */
@@ -22,6 +28,101 @@
             min-height: 100vh;
         }
 
+        .iphone {
+            width: 430px;
+            height: 932px;
+            background-color: #000;
+            border-radius: 55px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 0 0 3px #2c2c2c;
+        }
+
+        .notch {
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 160px;
+            height: 35px;
+            background-color: #000;
+            border-bottom-left-radius: 24px;
+            border-bottom-right-radius: 24px;
+            z-index: 1000;
+        }
+
+        .screen {
+            width: 100%;
+            height: 100%;
+            background-color: #C7F5EB;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .status-bar {
+            display: flex;
+            justify-content: space-between;
+            padding: 5px 20px;
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        .app-container {
+            position: absolute;
+            top: 100px;
+            left: 30px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .app-icon {
+            width: 60px;
+            height: 60px;
+            background-color: #ff6347;
+            border-radius: 15px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 24px;
+            color: white;
+            cursor: pointer;
+        }
+
+        .app-name {
+            text-align: center;
+            font-size: 12px;
+            margin-top: 5px;
+        }
+
+        .dock {
+            display: flex;
+            justify-content: space-around;
+            background-color: rgba(255, 255, 255, 0.2);
+            border-radius: 30px;
+            padding: 10px;
+            margin-top: auto;
+        }
+
+        .dock-icon {
+            width: 60px;
+            height: 60px;
+            background-color: #3498db;
+            border-radius: 15px;
+        }
+
+        #pomodoro-app {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: white;
+            display: none;
+            z-index: 1001;
+        }
+
         .container {
             width: 430px;
             height: 932px;
@@ -35,11 +136,42 @@
             box-sizing: border-box;
         }
 
+        .back-btn {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            z-index: 1002;
+        }
+
         .title {
             font-size: 36px;
             color: var(--accent-color);
             text-align: center;
             margin-bottom: 30px;
+        }
+
+        .theme-selector {
+            display: flex;
+            justify-content: space-between;
+            background-color: var(--primary-color);
+            border-radius: 20px;
+            padding: 0.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .theme-button {
+            border: none;
+            background: none;
+            padding: 0.5rem 1rem;
+            border-radius: 15px;
+            cursor: pointer;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        .theme-button.active {
+            background-color: var(--background-color);
+            color: var(--accent-color);
+            font-weight: bold;
         }
 
         .timer-block {
@@ -193,44 +325,73 @@
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1 class="title">Pomodoro Timer</h1>
-        
-        <div class="timer-block">
-            <div id="timer-display">25:00</div>
-            <div id="break-timer-display">Break: 05:00</div>
-            <div id="input-container">
-                <div class="input-group">
-                    <input type="number" id="work-duration"  required min="1" max="60" value="25">
-                    <label for="work-duration">Work Duration (minutes)</label>
-                </div>
-                <div class="input-group">
-                    <input type="number" id="break-duration"  required min="1" max="30" value="5">
-                    <label for="break-duration">Break Duration (minutes)</label>
-                </div>
-                <div class="input-group">
-                    <input type="number" id="repetitions"  required min="1" max="10" value="2">
-                    <label for="repetitions">Repetitions</label>
-                </div>
+    <div class="iphone">
+        <div class="notch"></div>
+        <div class="screen">
+            <div class="status-bar">
+                <span>9:41</span>
+                <span>100%</span>
             </div>
-            <div class="timer-buttons">
-                <button id="start-btn">Start</button>
-                <button id="pause-btn" style="display: none;">Pause</button>
-                <button id="reset-btn" style="display: none;">Reset</button>
+            <div class="app-container">
+                <div class="app-icon" id="pomodoro-icon">⏱️</div>
+                <div class="app-name">Pomodoro</div>
+            </div>
+            <div class="dock">
+                <div class="dock-icon"></div>
+                <div class="dock-icon"></div>
+                <div class="dock-icon"></div>
+                <div class="dock-icon"></div>
             </div>
         </div>
-        
-        <div class="repetition-indicator" id="repetition-indicator"></div>
-        
-        <div class="animation-block">
-            <svg class="progress-ring" width="300" height="300">
-                <circle class="progress-ring__circle" stroke="white" stroke-width="8" fill="transparent" r="146" cx="150" cy="150"/>
-            </svg>
-            <img id="animation-gif" src="initi.gif" alt="Timer animation">
+        <div id="pomodoro-app">
+            <button class="back-btn">&lt;</button>
+            <div class="container">
+                <h1 class="title">Pomodoro Timer</h1>
+                <div class="theme-selector">
+                    <button class="theme-button active" data-theme="doraemon">Doraemon</button>
+                    <button class="theme-button" data-theme="shinchan">Shinchan</button>
+                </div>
+                <div class="timer-block">
+                    <div id="timer-display">25:00</div>
+                    <div id="break-timer-display">Break: 05:00</div>
+                    <div id="input-container">
+                        <div class="input-group">
+                            <input type="number" id="work-duration"  required min="1" max="60" value="25">
+                            <label for="work-duration">Work Duration (minutes)</label>
+                        </div>
+                        <div class="input-group">
+                            <input type="number" id="break-duration"  required min="1" max="30" value="5">
+                            <label for="break-duration">Break Duration (minutes)</label>
+                        </div>
+                        <div class="input-group">
+                            <input type="number" id="repetitions"  required min="1" max="10" value="2">
+                            <label for="repetitions">Repetitions</label>
+                        </div>
+                    </div>
+                    <div class="timer-buttons">
+                        <button id="start-btn">Start</button>
+                        <button id="pause-btn" style="display: none;">Pause</button>
+                        <button id="reset-btn" style="display: none;">Reset</button>
+                    </div>
+                </div>
+                
+                <div class="repetition-indicator" id="repetition-indicator"></div>
+                
+                <div class="animation-block">
+                    <svg class="progress-ring" width="300" height="300">
+                        <circle class="progress-ring__circle" stroke="white" stroke-width="8" fill="transparent" r="146" cx="150" cy="150"/>
+                    </svg>
+                    <img id="animation-gif" src="initi.gif" alt="Timer animation">
+                </div>
+            </div>
         </div>
     </div>
 
     <script>
+        const pomodoroIcon = document.getElementById('pomodoro-icon');
+        const pomodoroApp = document.getElementById('pomodoro-app');
+        const backBtn = document.querySelector('.back-btn');
+
         const timerDisplay = document.getElementById('timer-display');
         const breakTimerDisplay = document.getElementById('break-timer-display');
         const workDurationInput = document.getElementById('work-duration');
@@ -250,6 +411,88 @@
         let currentRepetition = 1;
         let timeLeft;
         let totalTime;
+        let currentTheme = 'doraemon';
+
+        pomodoroIcon.addEventListener('click', () => {
+            document.querySelector('.screen').style.display = 'none';
+            pomodoroApp.style.display = 'block';
+        });
+
+        backBtn.addEventListener('click', () => {
+            document.querySelector('.screen').style.display = 'flex';
+            pomodoroApp.style.display = 'none';
+        });
+
+        const themes = {
+            doraemon: {
+                primary: "#c8e9fc",
+                secondary: "#79afff",
+                accent: "#004278",
+                background: "#ffffff",
+                text: "#000000",
+                animations: {
+                    init: "doraemon-init.gif",
+                    running: "doraemon-running.gif",
+                    break: "doraemon-break.gif",
+                    paused: "doraemon-paused.gif",
+                    completed: "doraemon-completed.gif"
+                },
+                face: "doraemon-face.png"
+            },
+            shinchan: {
+                primary: "#F98079",
+                secondary: "#F9E304",
+                accent: "#F91304",
+                background: "#fff6e6",
+                text: "#4a3000",
+                animations: {
+                    init: "shinchan-init.gif",
+                    running: "shinchan-running.gif",
+                    break: "shinchan-break.gif",
+                    paused: "shinchan-paused.gif",
+                    completed: "shinchan-completed.gif"
+                },
+                face: "shinchan-face.png"
+            }
+        };
+
+        function setTheme(themeName) {
+            currentTheme = themeName;
+            const theme = themes[themeName];
+            Object.keys(theme).forEach(key => {
+                if (key !== 'animations' && key !== 'face') {
+                    document.documentElement.style.setProperty(`--${key}-color`, theme[key]);
+                }
+            });
+
+            document.querySelectorAll('.theme-button').forEach(button => {
+                button.classList.toggle('active', button.dataset.theme === themeName);
+            });
+
+            updateAnimation();
+            updateRepetitionIndicator();
+        }
+
+        function updateAnimation() {
+            const animations = themes[currentTheme].animations;
+            if (isRunning) {
+                animationGif.src = isBreak ? animations.break : animations.running;
+            } else if (currentRepetition > parseInt(repetitionsInput.value)) {
+                animationGif.src = animations.completed;
+            } else if (timeLeft === null) {
+                animationGif.src = animations.init;
+            } else {
+                animationGif.src = animations.paused;
+            }
+        }
+
+        // Add event listeners to theme buttons
+        document.querySelectorAll('.theme-button').forEach(button => {
+            button.addEventListener('click', () => setTheme(button.dataset.theme));
+        });
+
+        // Set initial theme
+        setTheme('doraemon');
 
         const radius = progressRing.r.baseVal.value;
         const circumference = radius * 2 * Math.PI;
@@ -270,7 +513,7 @@
                 if (i < currentRepetition - 1 || (i === currentRepetition - 1 && isBreak)) {
                     dot.classList.add('completed');
                     const img = document.createElement('img');
-                    img.src = 'face.png';
+                    img.src = themes[currentTheme].face;
                     img.alt = 'Completed';
                     dot.appendChild(img);
                 }
@@ -312,7 +555,6 @@
                             isRunning = false;
                             totalTime = parseInt(breakDurationInput.value) * 60;
                             timeLeft = totalTime;
-                            animationGif.src = 'playing1.gif';
                             timerDisplay.style.display = 'none';
                             breakTimerDisplay.style.display = 'block';
                             startTimer();
@@ -321,11 +563,9 @@
                             currentRepetition++;
                             if (currentRepetition > parseInt(repetitionsInput.value)) {
                                 resetTimer();
-                                animationGif.src = 'celeb.gif';
                             } else {
                                 totalTime = parseInt(workDurationInput.value) * 60;
                                 timeLeft = totalTime;
-                                animationGif.src = 'runninggif.gif';
                                 timerDisplay.style.display = 'block';
                                 breakTimerDisplay.style.display = 'none';
                                 isRunning = false;
@@ -334,13 +574,11 @@
                         }
                         updateRepetitionIndicator();
                     }
+                    updateAnimation();
                 }, 1000);
                 
-                animationGif.src = isBreak ? 'playing1.gif' : 'runninggif.gif';
-                
-
+                updateAnimation();
             }
-            
         }
 
         function pauseTimer() {
@@ -348,11 +586,11 @@
                 isRunning = false;
                 clearInterval(timer);
                 pauseBtn.textContent = 'Resume';
-                animationGif.src = 'crying.gif';
             } else {
                 startTimer();
                 pauseBtn.textContent = 'Pause';
             }
+            updateAnimation();
         }
 
         function resetTimer() {
@@ -369,9 +607,9 @@
             timerDisplay.textContent = `${workDurationInput.value.toString().padStart(2, '0')}:00`;
             timerDisplay.style.display = 'block';
             breakTimerDisplay.style.display = 'none';
-            animationGif.src = 'init.gif';
             setProgress(0);
             updateRepetitionIndicator();
+            updateAnimation();
         }
 
         startBtn.addEventListener('click', startTimer);
