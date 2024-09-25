@@ -427,7 +427,7 @@
         <div class="notch"></div>
         <div class="screen">
             <div class="status-bar">
-                <span>9:41</span>
+                <span id="current-time">9:41</span>
                 <span>🔋100%</span>
             </div>
             <div class="app-container">
@@ -492,6 +492,18 @@
     </div>
 
     <script>
+
+        function updateTime() {
+                const timeElement = document.getElementById('current-time');
+                const now = new Date();
+                const hours = now.getHours().toString().padStart(2, '0');
+                const minutes = now.getMinutes().toString().padStart(2, '0');
+                timeElement.textContent = `${hours}:${minutes}`;
+            }
+
+        // Update the time immediately and then every minute
+        updateTime();
+        setInterval(updateTime, 60000);
         const pomodoroIcon = document.getElementById('pomodoro-icon');
         const pomodoroApp = document.getElementById('pomodoro-app');
         const backBtn = document.querySelector('.back-btn');
