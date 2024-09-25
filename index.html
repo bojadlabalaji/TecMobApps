@@ -31,7 +31,7 @@
         .iphone {
             width: 430px;
             height: 932px;
-            background-color: #000;
+            background-color: #a7ffff6e;
             border-radius: 55px;
             position: relative;
             overflow: hidden;
@@ -67,6 +67,7 @@
             padding: 5px 20px;
             font-size: 14px;
             font-weight: bold;
+            z-index: 1000;
         }
 
         .app-container {
@@ -112,7 +113,88 @@
             background-color: #3498db;
             border-radius: 15px;
         }
+        
+        .bottom-dock {
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 40%;
+            height: 5px;
+            background-color: #000000;
+            border-radius: 3px;
+            cursor: pointer;
+            z-index: 10005;
+        }
+        
+        .home-indicator {
+            position: absolute;
+            bottom: 8px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 40%;
+            height: 5px;
+            background-color: #000000;
+            border-radius: 3px;
+            cursor: pointer;
+            z-index: 10005;
+        }
 
+        .resumed-app {
+            position: absolute;
+            bottom: 100px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80%;
+            height: 60%;
+            background-color: white;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
+            display: none;
+        }
+        
+        .resumed-app-icon {
+            position: absolute;
+            top: -30px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 60px;
+            height: 60px;
+            background-color: #ff6347;
+            border-radius: 15px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 24px;
+            color: white;
+            z-index: 1001;
+        }
+        
+        .resumed-app-name {
+            position: absolute;
+            top: 40px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 14px;
+            color: white;
+            z-index: 1001;
+        }
+        
+        .home-indicator {
+            position: absolute;
+            bottom: 8px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 40%;
+            height: 5px;
+            background-color: #000000;
+            border-radius: 3px;
+            cursor: pointer;
+            z-index: 10005;
+        }
+
+        /* 
         #pomodoro-app {
             position: absolute;
             top: 0;
@@ -121,7 +203,18 @@
             height: 100%;
             background-color: white;
             display: none;
-            z-index: 1001;
+            z-index: 100;
+        }
+            */
+        #pomodoro-app {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #C7F5EB;
+            display: none;
+            z-index: 100;
         }
 
         .container {
@@ -139,8 +232,9 @@
 
         .back-btn {
             position: absolute;
-            top: 20px;
+            top: 40px;
             left: 20px;
+            padding : 10px;
             z-index: 1002;
         }
 
@@ -323,6 +417,7 @@
             border-radius: 50%;
             object-fit: cover;
         }
+        
     </style>
 </head>
 <body>
@@ -331,7 +426,7 @@
         <div class="screen">
             <div class="status-bar">
                 <span>9:41</span>
-                <span>100%</span>
+                <span>🔋100%</span>
             </div>
             <div class="app-container">
                 <div class="app-icon" id="pomodoro-icon">⏱️</div>
@@ -343,6 +438,12 @@
                 <div class="dock-icon"></div>
                 <div class="dock-icon"></div>
             </div>
+            <div class="resumed-app">
+                <div class="resumed-app-icon">⏱️</div>
+                <div class="resumed-app-name">Pomodoro</div>
+                <div class="container" style="transform: scale(0.8); transform-origin: center center;"></div>
+            </div>
+            <div class="home-indicator" id="home-indicator"></div>
         </div>
         <div id="pomodoro-app">
             <button class="back-btn">&lt;</button>
@@ -413,6 +514,77 @@
         let timeLeft;
         let totalTime;
         let currentTheme = 'doraemon';
+
+
+        // Buttom dock start ------------------------  -->
+        const homeIndicator = document.getElementById('home-indicator');
+        const resumedApp = document.querySelector('.resumed-app');
+        let startY, currentY;
+        let isDragging = false;
+        let isAppResumed = false;
+
+        homeIndicator.addEventListener('mousedown', startDrag);
+        document.addEventListener('mousemove', drag);
+        document.addEventListener('mouseup', endDrag);
+
+        homeIndicator.addEventListener('touchstart', startDrag);
+        document.addEventListener('touchmove', drag);
+        document.addEventListener('touchend', endDrag);
+
+  
+
+
+        function startDrag(e) {
+            isDragging = true;
+            startY = e.type.includes('mouse') ? e.clientY : e.touches[0].clientY;
+        }
+        pomodoroApp.addEventListener('click', () => {
+            if (isAppResumed){
+                pomodoroApp.style.scale = '100%' ;
+                isAppResumed = false;
+            }
+        });
+           
+
+        function drag(e) {
+            if (!isDragging) return;
+            e.preventDefault();
+            currentY = e.type.includes('mouse') ? e.clientY : e.touches[0].clientY;
+            const deltaY = startY - currentY;
+
+            if (deltaY > 50) {
+                // Go to home screen
+                document.querySelector('.screen').style.display = 'flex';
+                pomodoroApp.style.display = 'none';
+                resumedApp.style.display = 'none';
+                endDrag();
+            } else if (deltaY > 20 && deltaY <= 50) {
+                // Show app switcher (resume Pomodoro app)
+                document.querySelector('.screen').style.display = 'none';
+                pomodoroApp.style.display = 'block';
+                isAppResumed = true;
+                pomodoroApp.style.scale = '70%' ;
+                resumedApp.style.display = 'block';
+                endDrag();
+            }
+        }
+
+        function endDrag() {
+            isDragging = false;
+        }
+
+        pomodoroIcon.addEventListener('click', () => {
+            document.querySelector('.screen').style.display = 'none';
+            pomodoroApp.style.display = 'block';
+            resumedApp.style.display = 'none';
+        });
+
+        backBtn.addEventListener('click', () => {
+            document.querySelector('.screen').style.display = 'flex';
+            pomodoroApp.style.display = 'none';
+            resumedApp.style.display = 'none';
+        });
+        // Buttom dock end ------------------------  -->
 
         pomodoroIcon.addEventListener('click', () => {
             document.querySelector('.screen').style.display = 'none';
